@@ -1,30 +1,22 @@
 import { useMemo } from 'react';
-import {
-  Activity,
-  ArrowRight,
-  Award,
-  BarChart3,
-  Bell,
-  BookOpen,
-  Bot,
-  Building2,
-  CheckCircle2,
-  Landmark,
-  ShieldCheck,
-  Sliders,
-  TrendingUp,
-  UserCheck,
-} from 'lucide-react';
+import { ArrowRight, Check, Moon, Sun } from 'lucide-react';
 import { rankAllBanks } from '../engine/arbitrage';
 import { MarketSnapshot } from '../services/ratesApi';
 import { fmtBs, fmtPct } from '../utils/format';
 
 interface LandingPageProps {
   snapshot: MarketSnapshot;
+  theme: 'light' | 'dark';
+  onToggleTheme: () => void;
   onEnterTerminal: (tab?: 'terminal' | 'simulator' | 'ledger' | 'alerts' | 'radar') => void;
 }
 
-export function LandingPage({ snapshot, onEnterTerminal }: LandingPageProps) {
+export function LandingPage({
+  snapshot,
+  theme,
+  onToggleTheme,
+  onEnterTerminal,
+}: LandingPageProps) {
   const top3Banks = useMemo(
     () =>
       rankAllBanks({
@@ -37,319 +29,327 @@ export function LandingPage({ snapshot, onEnterTerminal }: LandingPageProps) {
   );
 
   return (
-    <div className="min-h-screen bg-white text-slate-900">
-      {/* Enterprise Top Navigation */}
-      <header className="sticky top-0 z-30 border-b border-slate-200/80 bg-white/90 backdrop-blur-md">
+    <div className="min-h-screen bg-white text-slate-900 transition-colors dark:bg-[#0b1120] dark:text-slate-100">
+      {/* Enterprise Top Bar */}
+      <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur-md dark:border-slate-800 dark:bg-[#0b1120]/95">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3.5 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#0067b8] text-white shadow-sm">
-              <BarChart3 className="h-5 w-5" />
+          <div className="flex items-center gap-3">
+            <div className="flex h-8 w-8 items-center justify-center rounded-md bg-[#0067b8] font-mono text-xs font-bold text-white">
+              CD
             </div>
-            <div>
-              <span className="text-base font-bold tracking-tight text-slate-900">
-                CalcuDivisas <span className="text-[#0067b8]">Pro</span>
+            <div className="flex items-baseline gap-2">
+              <span className="text-base font-bold tracking-tight text-slate-900 dark:text-white">
+                CalcuDivisas <span className="text-[#0067b8] dark:text-sky-400">Pro</span>
               </span>
-              <span className="ml-2 hidden rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-600 sm:inline-block">
-                Enterprise FX
+              <span className="hidden text-xs font-medium text-slate-400 sm:inline">
+                FX &amp; P2P Intelligence
               </span>
             </div>
           </div>
 
-          <nav className="hidden items-center gap-7 text-sm font-medium text-slate-600 md:flex">
-            <a href="#como-funciona" className="transition hover:text-[#0067b8]">
-              Cómo funciona
+          <nav className="hidden items-center gap-8 text-sm font-medium text-slate-600 md:flex dark:text-slate-300">
+            <a href="#flujo" className="transition hover:text-[#0067b8] dark:hover:text-sky-400">
+              Metodología
             </a>
-            <a href="#beneficios-negocio" className="transition hover:text-[#0067b8]">
+            <a href="#empresas" className="transition hover:text-[#0067b8] dark:hover:text-sky-400">
               Para Comercios
             </a>
-            <a href="#modulos" className="transition hover:text-[#0067b8]">
+            <a href="#modulos" className="transition hover:text-[#0067b8] dark:hover:text-sky-400">
               Módulos
             </a>
           </nav>
 
-          <div className="flex items-center gap-3">
-            <div className="hidden items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs lg:flex">
-              <span className="h-2 w-2 rounded-full bg-emerald-500" />
-              <span className="text-slate-500">Brecha hoy:</span>
-              <span className="font-mono font-semibold text-slate-900">
-                {fmtPct(snapshot.brechaPct)}
-              </span>
-            </div>
+          <div className="flex items-center gap-2.5">
+            <button
+              type="button"
+              onClick={onToggleTheme}
+              title={theme === 'dark' ? 'Cambiar a fondo blanco' : 'Cambiar a fondo oscuro'}
+              className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-slate-200 bg-slate-50 text-slate-600 transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
+            >
+              {theme === 'dark' ? (
+                <Sun className="h-4 w-4" strokeWidth={1.75} />
+              ) : (
+                <Moon className="h-4 w-4" strokeWidth={1.75} />
+              )}
+            </button>
             <button
               type="button"
               onClick={() => onEnterTerminal('terminal')}
-              className="inline-flex items-center gap-2 rounded-lg bg-[#0067b8] px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[#00569c]"
+              className="inline-flex items-center gap-2 rounded-md bg-[#0067b8] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#00569c]"
             >
-              Ingresar a la Terminal
-              <ArrowRight className="h-4 w-4" />
+              Abrir Terminal
+              <ArrowRight className="h-4 w-4" strokeWidth={1.75} />
             </button>
           </div>
         </div>
       </header>
 
       {/* Hero Section */}
-      <section className="border-b border-slate-200 bg-gradient-to-b from-slate-50 to-white">
+      <section className="border-b border-slate-200 bg-slate-50/60 dark:border-slate-800 dark:bg-[#0f172a]/50">
         <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-12 px-4 py-16 sm:px-6 lg:grid-cols-12 lg:px-8 lg:py-24">
           <div className="lg:col-span-6">
-            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-semibold text-[#0067b8]">
-              <ShieldCheck className="h-3.5 w-3.5" />
-              Inteligencia Cambiaria en Tiempo Real · Venezuela
-            </div>
-            <h1 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-5xl sm:leading-[1.12]">
-              Protege el capital de tu negocio y maximiza cada operación cambiaria.
+            <p className="mb-3 font-mono text-xs font-semibold tracking-widest text-[#0067b8] uppercase dark:text-sky-400">
+              Plataforma de Gestión Cambiaria · Venezuela
+            </p>
+            <h1 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-5xl sm:leading-[1.1] dark:text-white">
+              Control exacto de tus márgenes cambiarios en tiempo real.
             </h1>
-            <p className="mt-5 text-base leading-relaxed text-slate-600 sm:text-lg">
-              CalcuDivisas Pro conecta las tasas oficiales del <strong>BCV</strong> con{' '}
-              <strong>Binance P2P</strong> y <strong>Bybit</strong>, compara automáticamente las
-              comisiones de <strong>14 bancos venezolanos</strong> y calcula tu ganancia neta real
-              antes de mover un solo bolívar.
+            <p className="mt-5 text-base leading-relaxed text-slate-600 sm:text-lg dark:text-slate-300">
+              Integra cotizaciones oficiales del <strong>BCV</strong> con liquidez de{' '}
+              <strong>Binance P2P</strong> y <strong>Bybit</strong>, audita las comisiones reales de
+              14 entidades bancarias y calcula tu punto de equilibrio antes de ejecutar cualquier
+              operación.
             </p>
 
-            <div className="mt-8 flex flex-wrap items-center gap-3.5">
+            <div className="mt-8 flex flex-wrap items-center gap-3">
               <button
                 type="button"
                 onClick={() => onEnterTerminal('terminal')}
-                className="inline-flex items-center gap-2 rounded-lg bg-[#0067b8] px-6 py-3 text-sm font-semibold text-white shadow-md shadow-blue-900/10 transition hover:bg-[#00569c]"
+                className="inline-flex items-center gap-2 rounded-md bg-[#0067b8] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#00569c]"
               >
-                Abrir Terminal Ahora
-                <ArrowRight className="h-4 w-4" />
+                Ingresar a la Terminal
+                <ArrowRight className="h-4 w-4" strokeWidth={1.75} />
               </button>
               <a
-                href="#como-funciona"
-                className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                href="#flujo"
+                className="inline-flex items-center rounded-md border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
               >
-                Ver cómo funciona
+                Ver arquitectura y uso
               </a>
             </div>
 
-            <div className="mt-8 grid grid-cols-3 gap-4 border-t border-slate-200 pt-6">
+            <div className="mt-10 grid grid-cols-3 gap-6 border-t border-slate-200 pt-6 dark:border-slate-800">
               <div>
-                <div className="font-mono text-xl font-bold text-slate-900">14 Bancos</div>
-                <div className="text-xs text-slate-500">Ranking simultáneo</div>
+                <div className="font-mono text-xl font-bold text-slate-900 dark:text-white">
+                  14
+                </div>
+                <div className="text-xs text-slate-500 dark:text-slate-400">
+                  Bancos modelados
+                </div>
               </div>
               <div>
-                <div className="font-mono text-xl font-bold text-slate-900">60 seg</div>
-                <div className="text-xs text-slate-500">Sincronización en vivo</div>
+                <div className="font-mono text-xl font-bold text-slate-900 dark:text-white">
+                  60s
+                </div>
+                <div className="text-xs text-slate-500 dark:text-slate-400">
+                  Actualización continua
+                </div>
               </div>
               <div>
-                <div className="font-mono text-xl font-bold text-[#0067b8]">Telegram</div>
-                <div className="text-xs text-slate-500">Alertas automáticas</div>
+                <div className="font-mono text-xl font-bold text-[#0067b8] dark:text-sky-400">
+                  {fmtPct(snapshot.brechaPct)}
+                </div>
+                <div className="text-xs text-slate-500 dark:text-slate-400">
+                  Brecha BCV / P2P actual
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Live Market Snapshot Preview Card */}
+          {/* Institutional Live Market Table Card */}
           <div className="lg:col-span-6">
-            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xl shadow-slate-200/70">
-              <div className="mb-4 flex items-center justify-between border-b border-slate-100 pb-4">
+            <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+              <div className="mb-5 flex items-center justify-between border-b border-slate-100 pb-4 dark:border-slate-800">
                 <div>
-                  <span className="text-xs font-semibold tracking-wider text-slate-400 uppercase">
-                    Monitor en Vivo · Ejemplo $1,000 USD
+                  <span className="font-mono text-[11px] font-semibold tracking-wider text-slate-400 uppercase">
+                    Referencia en Vivo · Base $1,000 USD
                   </span>
-                  <h2 className="mt-0.5 text-base font-bold text-slate-900">
-                    Comparativa Bancaria Instantánea
+                  <h2 className="mt-0.5 text-sm font-bold text-slate-900 dark:text-white">
+                    Comparativa Neta por Entidad
                   </h2>
                 </div>
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">
-                  <Activity className="h-3.5 w-3.5" />
-                  Brecha {fmtPct(snapshot.brechaPct)}
+                <span className="inline-flex items-center gap-1.5 rounded-md border border-emerald-200 bg-emerald-50 px-2.5 py-1 font-mono text-xs font-semibold text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-300">
+                  EN VIVO
                 </span>
               </div>
 
               <div className="mb-5 grid grid-cols-3 gap-3">
-                <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
-                  <span className="text-[11px] font-medium text-slate-500">BCV USD</span>
-                  <div className="mt-0.5 font-mono text-base font-bold text-slate-900">
+                <div className="rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-950">
+                  <div className="text-[11px] font-medium text-slate-500 dark:text-slate-400">
+                    BCV USD
+                  </div>
+                  <div className="mt-1 font-mono text-sm font-bold text-slate-900 dark:text-white">
                     {fmtBs(snapshot.bcvUsd)} Bs
                   </div>
                 </div>
-                <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
-                  <span className="text-[11px] font-medium text-slate-500">Binance P2P</span>
-                  <div className="mt-0.5 font-mono text-base font-bold text-[#0067b8]">
+                <div className="rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-950">
+                  <div className="text-[11px] font-medium text-slate-500 dark:text-slate-400">
+                    Binance P2P
+                  </div>
+                  <div className="mt-1 font-mono text-sm font-bold text-[#0067b8] dark:text-sky-400">
                     {fmtBs(snapshot.binanceBuy)} Bs
                   </div>
                 </div>
-                <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
-                  <span className="text-[11px] font-medium text-slate-500">Bybit P2P</span>
-                  <div className="mt-0.5 font-mono text-base font-bold text-slate-900">
+                <div className="rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-950">
+                  <div className="text-[11px] font-medium text-slate-500 dark:text-slate-400">
+                    Bybit P2P
+                  </div>
+                  <div className="mt-1 font-mono text-sm font-bold text-slate-900 dark:text-white">
                     {fmtBs(snapshot.bybitBuy)} Bs
                   </div>
                 </div>
               </div>
 
-              <div className="space-y-2.5">
-                <div className="text-xs font-semibold tracking-wider text-slate-400 uppercase">
-                  Top 3 Bancos Más Rentables Hoy ($1,000 USD)
-                </div>
-                {top3Banks.map((item) => (
-                  <div
-                    key={item.bank.id}
-                    className="flex items-center justify-between rounded-xl border border-slate-200 bg-white px-4 py-3 transition hover:border-blue-300"
-                  >
-                    <div className="flex items-center gap-3">
-                      <span
-                        className={`flex h-6 w-6 items-center justify-center rounded-full font-mono text-xs font-bold ${
-                          item.rank === 1
-                            ? 'bg-blue-50 text-[#0067b8]'
-                            : 'bg-slate-100 text-slate-600'
-                        }`}
-                      >
-                        {item.rank}
-                      </span>
-                      <div>
-                        <div className="text-sm font-semibold text-slate-900">
-                          {item.bank.name}
-                        </div>
-                        <div className="font-mono text-[11px] text-slate-500">
-                          Break-Even: {fmtBs(item.result.breakEvenP2pRate)} Bs
-                        </div>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="font-mono text-sm font-bold text-emerald-700">
-                        +{fmtBs(item.result.gananciaBs)} Bs
-                      </div>
-                      <div className="font-mono text-xs font-semibold text-slate-500">
-                        {fmtPct(item.result.roiPct, 2, true)} ROI
-                      </div>
-                    </div>
-                  </div>
-                ))}
+              <div className="overflow-hidden rounded-lg border border-slate-200 dark:border-slate-800">
+                <table className="w-full text-left text-xs">
+                  <thead className="bg-slate-50 text-[11px] font-semibold tracking-wider text-slate-500 uppercase dark:bg-slate-950 dark:text-slate-400">
+                    <tr>
+                      <th className="px-3.5 py-2.5">#</th>
+                      <th className="px-3.5 py-2.5">Entidad</th>
+                      <th className="px-3.5 py-2.5 text-right">Break-Even</th>
+                      <th className="px-3.5 py-2.5 text-right">Ganancia Neta</th>
+                      <th className="px-3.5 py-2.5 text-right">ROI</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                    {top3Banks.map((item) => (
+                      <tr key={item.bank.id}>
+                        <td className="px-3.5 py-3 font-mono font-semibold text-slate-500">
+                          {item.rank}
+                        </td>
+                        <td className="px-3.5 py-3 font-semibold text-slate-900 dark:text-slate-100">
+                          {item.bank.shortName}
+                        </td>
+                        <td className="px-3.5 py-3 text-right font-mono text-slate-600 dark:text-slate-400">
+                          {fmtBs(item.result.breakEvenP2pRate)}
+                        </td>
+                        <td className="px-3.5 py-3 text-right font-mono font-semibold text-emerald-700 dark:text-emerald-400">
+                          +{fmtBs(item.result.gananciaBs)} Bs
+                        </td>
+                        <td className="px-3.5 py-3 text-right font-mono font-semibold text-slate-900 dark:text-slate-200">
+                          {fmtPct(item.result.roiPct, 2, true)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
 
               <button
                 type="button"
                 onClick={() => onEnterTerminal('terminal')}
-                className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
+                className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-md bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800 dark:bg-[#0067b8] dark:hover:bg-[#00569c]"
               >
-                Calcular con mi propio monto
-                <ArrowRight className="h-4 w-4" />
+                Abrir Calculadora Completa
+                <ArrowRight className="h-4 w-4" strokeWidth={1.75} />
               </button>
             </div>
           </div>
         </div>
       </section>
 
-      {/* How It Works */}
-      <section id="como-funciona" className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-2xl text-center">
-          <span className="text-xs font-semibold tracking-wider text-[#0067b8] uppercase">
-            Flujo de Trabajo Simplificado
-          </span>
-          <h2 className="mt-2 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
-            Decisiones financieras claras en 3 pasos
-          </h2>
-          <p className="mt-3 text-sm text-slate-600 sm:text-base">
-            Diseñada para que cualquier persona o equipo administrativo entienda su margen real sin
-            hojas de cálculo complejas.
+      {/* Methodology */}
+      <section id="flujo" className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+        <div className="max-w-2xl">
+          <p className="font-mono text-xs font-semibold tracking-widest text-[#0067b8] uppercase dark:text-sky-400">
+            Metodología
           </p>
+          <h2 className="mt-2 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl dark:text-white">
+            Del dato oficial a la ejecución sin fricción
+          </h2>
         </div>
 
-        <div className="mt-12 grid grid-cols-1 gap-6 md:grid-cols-3">
+        <div className="mt-10 grid grid-cols-1 gap-6 md:grid-cols-3">
           {[
             {
-              step: '01',
-              title: 'Sincronización Automática',
-              desc: 'Consulta en paralelo el dólar/euro BCV, intervenciones cambiarias y cotizaciones reales de Binance y Bybit P2P.',
-              icon: Landmark,
+              num: '01',
+              title: 'Captura de Mercado',
+              body: 'Sincroniza automáticamente tasas oficiales BCV (USD y EUR), intervenciones cambiarias y libros de Binance y Bybit P2P.',
             },
             {
-              step: '02',
-              title: 'Auditoría de Comisiones',
-              desc: 'Descuenta automáticamente la comisión de compra bancaria, recargas, uso de tarjeta internacional y fees P2P en los 14 bancos.',
-              icon: Award,
+              num: '02',
+              title: 'Desglose de Fricción Bancaria',
+              body: 'Aplica las comisiones de compra, recarga de tarjeta, cargos diferidos y tarifas P2P para rankear los 14 bancos en tiempo real.',
             },
             {
-              step: '03',
-              title: 'Control y Alertas en Telegram',
-              desc: 'Registra cada operación en tu bitácora exportable a CSV y recibe notificaciones en Telegram cuando la brecha alcanza tu objetivo.',
-              icon: Bot,
+              num: '03',
+              title: 'Registro y Alertas en Telegram',
+              body: 'Documenta cada operación en la bitácora exportable a CSV y recibe avisos automáticos cuando la brecha alcanza tu objetivo.',
             },
-          ].map((item) => {
-            const Icon = item.icon;
-            return (
-              <div
-                key={item.step}
-                className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:border-blue-200 hover:shadow-md"
-              >
-                <div className="mb-4 flex items-center justify-between">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-[#0067b8]">
-                    <Icon className="h-5 w-5" />
-                  </div>
-                  <span className="font-mono text-xs font-bold text-slate-400">PASO {item.step}</span>
-                </div>
-                <h3 className="text-base font-bold text-slate-900">{item.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-slate-600">{item.desc}</p>
+          ].map((step) => (
+            <div
+              key={step.num}
+              className="rounded-xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900"
+            >
+              <div className="font-mono text-xs font-bold text-[#0067b8] dark:text-sky-400">
+                {step.num}
               </div>
-            );
-          })}
+              <h3 className="mt-2 text-base font-bold text-slate-900 dark:text-white">
+                {step.title}
+              </h3>
+              <p className="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+                {step.body}
+              </p>
+            </div>
+          ))}
         </div>
       </section>
 
-      {/* Business & Daily User Benefits */}
-      <section id="beneficios-negocio" className="border-y border-slate-200 bg-slate-50">
+      {/* Business & Individual Comparison */}
+      <section
+        id="empresas"
+        className="border-y border-slate-200 bg-slate-50/70 dark:border-slate-800 dark:bg-slate-900/40"
+      >
         <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-          <div className="mx-auto max-w-2xl text-center">
-            <span className="text-xs font-semibold tracking-wider text-[#0067b8] uppercase">
-              Impacto Real
-            </span>
-            <h2 className="mt-2 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
-              Pensada para comercios y usuarios del día a día
+          <div className="max-w-2xl">
+            <p className="font-mono text-xs font-semibold tracking-widest text-[#0067b8] uppercase dark:text-sky-400">
+              Casos de Uso
+            </p>
+            <h2 className="mt-2 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl dark:text-white">
+              Diseñada para comercios y operadores diarios
             </h2>
           </div>
 
-          <div className="mt-12 grid grid-cols-1 gap-8 lg:grid-cols-2">
-            {/* Business Owners */}
-            <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
-              <div className="mb-5 flex items-center gap-3">
-                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#0067b8] text-white">
-                  <Building2 className="h-5 w-5" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-bold text-slate-900">Para Dueños de Comercios</h3>
-                  <p className="text-xs text-slate-500">
-                    Tiendas, bodegones, distribuidoras y servicios
-                  </p>
-                </div>
+          <div className="mt-10 grid grid-cols-1 gap-8 lg:grid-cols-2">
+            <div className="rounded-xl border border-slate-200 bg-white p-8 dark:border-slate-800 dark:bg-slate-900">
+              <div className="border-b border-slate-100 pb-4 dark:border-slate-800">
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+                  Dueños de Comercios y Empresas
+                </h3>
+                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                  Protección de capital de reposición y conciliación financiera
+                </p>
               </div>
-              <ul className="space-y-3.5 text-sm text-slate-700">
+              <ul className="mt-5 space-y-3 text-sm text-slate-700 dark:text-slate-300">
                 {[
-                  'Protege tu capital de reposición calculando el punto exacto de equilibrio (Break-Even) antes de reponer inventario.',
-                  'Identifica qué banco de tu empresa ofrece la menor fricción porcentual por volumen operado.',
-                  'Simula caídas o subidas del BCV (±3%) en la Matriz 5×5 para fijar precios sin descapitalizarte.',
-                  'Exporta tu Bitácora mensual en formato CSV listo para Excel y conciliación contable.',
-                ].map((text, idx) => (
-                  <li key={idx} className="flex items-start gap-2.5">
-                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[#0067b8]" />
-                    <span>{text}</span>
+                  'Determina el precio mínimo de equilibrio (Break-Even) antes de reponer inventario.',
+                  'Compara el rendimiento neto por banco para elegir la cuenta corporativa más eficiente.',
+                  'Evalúa escenarios de devaluación (±3% en BCV o P2P) con la Matriz de Sensibilidad 5×5.',
+                  'Exporta el historial completo en formato CSV compatible con Excel y sistemas contables.',
+                ].map((line, i) => (
+                  <li key={i} className="flex items-start gap-2.5">
+                    <Check
+                      className="mt-0.5 h-4 w-4 shrink-0 text-[#0067b8] dark:text-sky-400"
+                      strokeWidth={2}
+                    />
+                    <span>{line}</span>
                   </li>
                 ))}
               </ul>
             </div>
 
-            {/* Daily Users */}
-            <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
-              <div className="mb-5 flex items-center gap-3">
-                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-600 text-white">
-                  <UserCheck className="h-5 w-5" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-bold text-slate-900">Para el Usuario del Día a Día</h3>
-                  <p className="text-xs text-slate-500">
-                    Ahorro personal, freelancers y operaciones P2P
-                  </p>
-                </div>
+            <div className="rounded-xl border border-slate-200 bg-white p-8 dark:border-slate-800 dark:bg-slate-900">
+              <div className="border-b border-slate-100 pb-4 dark:border-slate-800">
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+                  Usuarios del Día a Día
+                </h3>
+                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                  Operaciones personales transparentes sin comisiones sorpresa
+                </p>
               </div>
-              <ul className="space-y-3.5 text-sm text-slate-700">
+              <ul className="mt-5 space-y-3 text-sm text-slate-700 dark:text-slate-300">
                 {[
-                  'Evita comisiones ocultas de tarjetas internacionales (2,5% a 4,8%) que convierten una aparente ganancia en pérdida.',
-                  'Calcula con tu saldo exacto en bolívares cuántos dólares enteros puedes comprar y cuánto te queda disponible.',
-                  'Consulta la tabla de los 14 bancos en un segundo sin hacer cuentas manuales ni abrir múltiples páginas.',
-                  'Conecta tu bot de Telegram para recibir alertas en el celular cuando la brecha alcance el porcentaje que buscas.',
-                ].map((text, idx) => (
-                  <li key={idx} className="flex items-start gap-2.5">
-                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
-                    <span>{text}</span>
+                  'Visualiza el descuento real de tarjetas internacionales (1,5% a 4,8%) antes de comprar.',
+                  'Calcula en modo inverso cuántos dólares enteros puedes adquirir con tu saldo en Bs.',
+                  'Consulta en una sola tabla qué banco te entrega mayor retorno neto en USDT.',
+                  'Suscríbete en un clic al bot @midivisas_pro_bot para consultar tasas desde Telegram.',
+                ].map((line, i) => (
+                  <li key={i} className="flex items-start gap-2.5">
+                    <Check
+                      className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400"
+                      strokeWidth={2}
+                    />
+                    <span>{line}</span>
                   </li>
                 ))}
               </ul>
@@ -358,23 +358,23 @@ export function LandingPage({ snapshot, onEnterTerminal }: LandingPageProps) {
         </div>
       </section>
 
-      {/* Modules Grid */}
+      {/* Modules */}
       <section id="modulos" className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-        <div className="mb-10 flex flex-wrap items-end justify-between gap-4">
+        <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
           <div>
-            <span className="text-xs font-semibold tracking-wider text-[#0067b8] uppercase">
-              Suite Completa
-            </span>
-            <h2 className="mt-1 text-2xl font-bold tracking-tight text-slate-900">
-              Cinco módulos integrados en una sola terminal
+            <p className="font-mono text-xs font-semibold tracking-widest text-[#0067b8] uppercase dark:text-sky-400">
+              Arquitectura Modular
+            </p>
+            <h2 className="mt-1 text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+              Módulos de la Terminal
             </h2>
           </div>
           <button
             type="button"
             onClick={() => onEnterTerminal('terminal')}
-            className="text-sm font-semibold text-[#0067b8] hover:underline"
+            className="text-sm font-semibold text-[#0067b8] hover:underline dark:text-sky-400"
           >
-            Explorar la Terminal →
+            Ir a la Terminal →
           </button>
         </div>
 
@@ -382,81 +382,60 @@ export function LandingPage({ snapshot, onEnterTerminal }: LandingPageProps) {
           {[
             {
               tab: 'terminal' as const,
+              code: '01',
               title: 'Terminal',
-              desc: 'Cálculo directo/inverso y ranking de los 14 bancos.',
-              icon: TrendingUp,
+              desc: 'Calculadora directa e inversa con ranking simultáneo de 14 bancos.',
             },
             {
               tab: 'simulator' as const,
+              code: '02',
               title: 'Simulador',
-              desc: 'Histórico de brecha y matriz de sensibilidad 5×5.',
-              icon: Sliders,
+              desc: 'Gráfico histórico de brecha y matriz de sensibilidad 5×5.',
             },
             {
               tab: 'ledger' as const,
+              code: '03',
               title: 'Bitácora',
-              desc: 'Win rate, rendimiento por banco y exportación CSV.',
-              icon: BookOpen,
+              desc: 'Métricas de portafolio, rendimiento por banco y exportación CSV.',
             },
             {
               tab: 'alerts' as const,
+              code: '04',
               title: 'Alertas',
-              desc: 'Reglas por umbral de brecha, BCV o tasa P2P.',
-              icon: Bell,
+              desc: 'Reglas configurables sobre brecha, BCV o tasas P2P.',
             },
             {
               tab: 'radar' as const,
+              code: '05',
               title: 'Radar TG',
-              desc: 'Conexión directa con tu bot oficial de Telegram.',
-              icon: Bot,
+              desc: 'Suscripción directa a @midivisas_pro_bot y monitoreo por banco.',
             },
-          ].map((m) => {
-            const Icon = m.icon;
-            return (
-              <button
-                key={m.tab}
-                type="button"
-                onClick={() => onEnterTerminal(m.tab)}
-                className="flex flex-col items-start rounded-2xl border border-slate-200 bg-white p-5 text-left transition hover:border-[#0067b8] hover:shadow-md"
-              >
-                <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-lg bg-slate-100 text-[#0067b8]">
-                  <Icon className="h-4 w-4" />
-                </div>
-                <div className="text-sm font-bold text-slate-900">{m.title}</div>
-                <p className="mt-1 text-xs leading-relaxed text-slate-600">{m.desc}</p>
-              </button>
-            );
-          })}
-        </div>
-      </section>
-
-      {/* Final CTA Banner */}
-      <section className="bg-[#0f172a] text-white">
-        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-6 px-4 py-14 text-center sm:px-6 lg:flex-row lg:px-8 lg:text-left">
-          <div>
-            <h2 className="text-2xl font-bold tracking-tight">
-              Toma el control de tus operaciones cambiarias hoy mismo
-            </h2>
-            <p className="mt-2 text-sm text-slate-300">
-              Sin registros obligatorios ni publicidad invasiva. Datos en vivo listos para operar.
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={() => onEnterTerminal('terminal')}
-            className="inline-flex shrink-0 items-center gap-2 rounded-lg bg-[#0067b8] px-6 py-3 text-sm font-semibold text-white shadow-lg transition hover:bg-[#1a7ad1]"
-          >
-            Ingresar a la Terminal
-            <ArrowRight className="h-4 w-4" />
-          </button>
+          ].map((m) => (
+            <button
+              key={m.tab}
+              type="button"
+              onClick={() => onEnterTerminal(m.tab)}
+              className="flex flex-col items-start rounded-xl border border-slate-200 bg-white p-5 text-left transition hover:border-[#0067b8] dark:border-slate-800 dark:bg-slate-900 dark:hover:border-sky-500"
+            >
+              <span className="font-mono text-[11px] font-bold text-[#0067b8] dark:text-sky-400">
+                MÓDULO {m.code}
+              </span>
+              <div className="mt-1.5 text-sm font-bold text-slate-900 dark:text-white">
+                {m.title}
+              </div>
+              <p className="mt-1.5 text-xs leading-relaxed text-slate-600 dark:text-slate-400">
+                {m.desc}
+              </p>
+            </button>
+          ))}
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-slate-200 bg-white py-6">
-        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-4 text-xs text-slate-500 sm:px-6 lg:px-8">
-          <span>CalcuDivisas Pro v2.0 — Plataforma de Inteligencia Cambiaria P2P</span>
-          <span>Fuentes públicas: BCV (dolarvzla) · Binance &amp; Bybit P2P (usdt.com.ve)</span>
+      <footer className="border-t border-slate-200 bg-slate-50 py-8 dark:border-slate-800 dark:bg-[#0b1120]">
+        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-4 text-xs text-slate-500 sm:px-6 lg:px-8 dark:text-slate-400">
+          <span>CalcuDivisas Pro v2.0 — Inteligencia Cambiaria</span>
+          <span>Datos públicos: BCV (dolarvzla) · Binance &amp; Bybit P2P (usdt.com.ve)</span>
         </div>
       </footer>
     </div>

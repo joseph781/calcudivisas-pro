@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Bell, BookOpen, Bot, Calculator, Home, Sliders, Terminal } from 'lucide-react';
+import { Bell, BookOpen, Bot, Calculator, Home, Moon, Sliders, Sun } from 'lucide-react';
 import { ArbitrageTerminal } from './components/ArbitrageTerminal';
 import { AlertsTab } from './components/AlertsTab';
 import { BankRadarPanel } from './components/BankRadarPanel';
@@ -55,9 +55,16 @@ const DEFAULT_ALERTS: AlertRule[] = [
 export function App() {
   const [view, setView] = useState<'landing' | 'app'>('landing');
   const [activeTab, setActiveTab] = useState<ActiveTab>('terminal');
+  const [theme, setTheme] = useLocalStorage<'light' | 'dark'>('calcudivisas_pro_theme', 'light');
   const [snapshot, setSnapshot] = useState<MarketSnapshot>(DEFAULT_SNAPSHOT);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [secondsUntilRefresh, setSecondsUntilRefresh] = useState(60);
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', theme === 'dark');
+  }, [theme]);
+
+  const toggleTheme = () => setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
 
   const [selectedBankId, setSelectedBankId] = useLocalStorage<string>('calcudivisas_pro_bank', 'bnc');
   const [operations, setOperations] = useLocalStorage<OperationRecord[]>('calcudivisas_pro_ops', []);
@@ -233,6 +240,8 @@ export function App() {
     return (
       <LandingPage
         snapshot={snapshot}
+        theme={theme}
+        onToggleTheme={toggleTheme}
         onEnterTerminal={(tab) => {
           if (tab) setActiveTab(tab);
           setView('app');
@@ -242,72 +251,86 @@ export function App() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100">
+    <div className="min-h-screen bg-slate-50 text-slate-900 transition-colors dark:bg-[#0b1120] dark:text-slate-100">
       {/* Top Navigation */}
-      <header className="border-b border-slate-800/80 bg-slate-950/90 backdrop-blur-md">
-        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-4 py-3.5 sm:px-6">
+      <header className="border-b border-slate-200 bg-white/95 backdrop-blur-md dark:border-slate-800/80 dark:bg-[#0b1120]/95">
+        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-4 py-3 sm:px-6">
           <div className="flex items-center gap-3">
             <button
               type="button"
               onClick={() => setView('landing')}
               title="Volver a la página de inicio"
-              className="flex h-9 w-9 items-center justify-center rounded-xl border border-amber-500/40 bg-amber-500/15 text-amber-400 transition hover:bg-amber-500/25"
+              className="flex h-8 w-8 items-center justify-center rounded-md bg-[#0067b8] font-mono text-xs font-bold text-white transition hover:bg-[#00569c]"
             >
-              <Terminal className="h-5 w-5" />
+              CD
             </button>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-base font-bold tracking-tight text-slate-100">
-                  CalcuDivisas <span className="text-amber-400">PRO</span>
+                <h1 className="text-sm font-bold tracking-tight text-slate-900 sm:text-base dark:text-slate-100">
+                  CalcuDivisas <span className="text-[#0067b8] dark:text-sky-400">Pro</span>
                 </h1>
-                <span className="rounded-md border border-slate-700 bg-slate-900 px-1.5 py-0.5 font-mono text-[10px] font-semibold text-slate-400">
-                  v2.0
-                </span>
                 <button
                   type="button"
                   onClick={() => setView('landing')}
-                  className="inline-flex items-center gap-1 rounded-md border border-slate-800 bg-slate-900 px-2 py-0.5 text-[10px] font-medium text-slate-400 transition hover:text-slate-200"
+                  className="inline-flex items-center gap-1 rounded-md border border-slate-200 bg-slate-50 px-2 py-0.5 text-[11px] font-medium text-slate-600 transition hover:bg-slate-100 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400 dark:hover:text-slate-200"
                 >
-                  <Home className="h-3 w-3" />
+                  <Home className="h-3 w-3" strokeWidth={1.75} />
                   Inicio
                 </button>
               </div>
-              <p className="text-[11px] text-slate-400">
-                Terminal de Arbitraje P2P · BCV vs Binance &amp; Bybit
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                Terminal Cambiaria · BCV vs Binance &amp; Bybit P2P
               </p>
             </div>
           </div>
 
-          <nav className="flex items-center gap-1 rounded-xl border border-slate-800 bg-slate-900/80 p-1">
-            {navItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = activeTab === item.id;
-              return (
-                <button
-                  key={item.id}
-                  type="button"
-                  onClick={() => setActiveTab(item.id)}
-                  className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
-                    isActive
-                      ? 'bg-amber-500 text-slate-950 shadow-sm'
-                      : 'text-slate-400 hover:bg-slate-800/70 hover:text-slate-200'
-                  }`}
-                >
-                  <Icon className="h-3.5 w-3.5" />
-                  <span>{item.label}</span>
-                  {item.badge !== undefined && (
-                    <span
-                      className={`rounded-full px-1.5 py-0.5 font-mono text-[10px] leading-none ${
-                        isActive ? 'bg-slate-950/20 text-slate-950' : 'bg-slate-800 text-slate-300'
-                      }`}
-                    >
-                      {item.badge}
-                    </span>
-                  )}
-                </button>
-              );
-            })}
-          </nav>
+          <div className="flex items-center gap-2">
+            <nav className="flex items-center gap-1 rounded-lg border border-slate-200 bg-slate-100/80 p-1 dark:border-slate-800 dark:bg-slate-900/80">
+              {navItems.map((item) => {
+                const Icon = item.icon;
+                const isActive = activeTab === item.id;
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => setActiveTab(item.id)}
+                    className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-semibold transition ${
+                      isActive
+                        ? 'bg-[#0067b8] text-white shadow-sm'
+                        : 'text-slate-600 hover:bg-white hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200'
+                    }`}
+                  >
+                    <Icon className="h-3.5 w-3.5" strokeWidth={1.75} />
+                    <span>{item.label}</span>
+                    {item.badge !== undefined && (
+                      <span
+                        className={`rounded-full px-1.5 py-0.5 font-mono text-[10px] leading-none ${
+                          isActive
+                            ? 'bg-white/20 text-white'
+                            : 'bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300'
+                        }`}
+                      >
+                        {item.badge}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </nav>
+
+            <button
+              type="button"
+              onClick={toggleTheme}
+              title={theme === 'dark' ? 'Cambiar a fondo blanco' : 'Cambiar a fondo oscuro'}
+              className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-100 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
+            >
+              {theme === 'dark' ? (
+                <Sun className="h-4 w-4" strokeWidth={1.75} />
+              ) : (
+                <Moon className="h-4 w-4" strokeWidth={1.75} />
+              )}
+            </button>
+          </div>
         </div>
       </header>
 
