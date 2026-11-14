@@ -1,5 +1,4 @@
 import { useMemo, useState } from 'react';
-import { Activity, TrendingUp } from 'lucide-react';
 import { fmtBs, fmtPct } from '../utils/format';
 
 export interface SpreadPoint {
@@ -11,9 +10,10 @@ export interface SpreadPoint {
 
 interface SpreadHistoryChartProps {
   points: SpreadPoint[];
+  sourceLabel?: string;
 }
 
-export function SpreadHistoryChart({ points }: SpreadHistoryChartProps) {
+export function SpreadHistoryChart({ points, sourceLabel }: SpreadHistoryChartProps) {
   const [hoverIdx, setHoverIdx] = useState<number | null>(null);
 
   const stats = useMemo(() => {
@@ -29,7 +29,7 @@ export function SpreadHistoryChart({ points }: SpreadHistoryChartProps) {
 
   const width = 760;
   const height = 210;
-  const padX = 36;
+  const padX = 40;
   const padY = 22;
   const innerW = width - padX * 2;
   const innerH = height - padY * 2;
@@ -68,57 +68,55 @@ export function SpreadHistoryChart({ points }: SpreadHistoryChartProps) {
   const activePoint = hoverIdx !== null ? coords[hoverIdx] : coords[coords.length - 1];
 
   return (
-    <section className="rounded-2xl border border-slate-800/90 bg-slate-900/75 p-5 shadow-xl shadow-black/20">
+    <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800/90 dark:bg-slate-900/75">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
-          <Activity className="h-4 w-4 text-amber-400" />
-          <div>
-            <h2 className="text-sm font-semibold tracking-wide text-slate-200 uppercase">
-              Histórico de Brecha (BCV vs Binance P2P)
-            </h2>
-            <p className="text-xs text-slate-400">
-              Registro continuo en vivo ({points.length} muestras capturadas)
-            </p>
-          </div>
+        <div>
+          <h2 className="text-xs font-bold tracking-wider text-slate-500 uppercase dark:text-slate-300">
+            Histórico de Brecha (BCV vs Binance P2P)
+          </h2>
+          <p className="text-xs text-slate-500 dark:text-slate-400">
+            {sourceLabel ?? `Registro continuo en vivo (${points.length} muestras)`}
+          </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2 text-xs">
-          <span className="rounded-lg border border-slate-800 bg-slate-950/70 px-2.5 py-1 font-mono text-slate-300">
-            Mín: <strong className="text-sky-300">{fmtPct(stats.min)}</strong>
+          <span className="rounded-md border border-slate-200 bg-slate-50 px-2.5 py-1 font-mono text-slate-700 dark:border-slate-800 dark:bg-slate-950/70 dark:text-slate-300">
+            Mín: <strong className="text-[#0067b8] dark:text-sky-300">{fmtPct(stats.min)}</strong>
           </span>
-          <span className="rounded-lg border border-slate-800 bg-slate-950/70 px-2.5 py-1 font-mono text-slate-300">
-            Prom: <strong className="text-amber-300">{fmtPct(stats.avg)}</strong>
+          <span className="rounded-md border border-slate-200 bg-slate-50 px-2.5 py-1 font-mono text-slate-700 dark:border-slate-800 dark:bg-slate-950/70 dark:text-slate-300">
+            Prom: <strong className="text-slate-900 dark:text-amber-300">{fmtPct(stats.avg)}</strong>
           </span>
-          <span className="rounded-lg border border-slate-800 bg-slate-950/70 px-2.5 py-1 font-mono text-slate-300">
-            Máx: <strong className="text-emerald-300">{fmtPct(stats.max)}</strong>
+          <span className="rounded-md border border-slate-200 bg-slate-50 px-2.5 py-1 font-mono text-slate-700 dark:border-slate-800 dark:bg-slate-950/70 dark:text-slate-300">
+            Máx: <strong className="text-emerald-700 dark:text-emerald-300">{fmtPct(stats.max)}</strong>
           </span>
         </div>
       </div>
 
       {activePoint && (
-        <div className="mb-3 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-slate-800/80 bg-slate-950/60 px-3.5 py-2 text-xs">
-          <div className="flex items-center gap-2 text-slate-300">
-            <TrendingUp className="h-3.5 w-3.5 text-amber-400" />
-            <span className="font-mono">
-              {new Date(activePoint.point.timestamp).toLocaleString('es-VE', {
-                day: '2-digit',
-                month: '2-digit',
-                hour: '2-digit',
-                minute: '2-digit',
-              })}
-            </span>
-          </div>
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3.5 py-2 text-xs dark:border-slate-800/80 dark:bg-slate-950/60">
+          <span className="font-mono text-slate-600 dark:text-slate-300">
+            {new Date(activePoint.point.timestamp).toLocaleString('es-VE', {
+              day: '2-digit',
+              month: '2-digit',
+              hour: '2-digit',
+              minute: '2-digit',
+            })}
+          </span>
           <div className="flex flex-wrap items-center gap-4 font-mono">
-            <span className="text-sky-300">BCV: {fmtBs(activePoint.point.bcvUsd)} Bs</span>
-            <span className="text-amber-300">P2P: {fmtBs(activePoint.point.binanceBuy)} Bs</span>
-            <span className="font-bold text-emerald-300">
+            <span className="text-slate-700 dark:text-sky-300">
+              BCV: {fmtBs(activePoint.point.bcvUsd)} Bs
+            </span>
+            <span className="text-[#0067b8] dark:text-amber-300">
+              P2P: {fmtBs(activePoint.point.binanceBuy)} Bs
+            </span>
+            <span className="font-bold text-emerald-700 dark:text-emerald-300">
               Brecha: {fmtPct(activePoint.point.brechaPct)}
             </span>
           </div>
         </div>
       )}
 
-      <div className="relative w-full overflow-hidden rounded-xl border border-slate-800 bg-slate-950/60 p-2">
+      <div className="relative w-full overflow-hidden rounded-lg border border-slate-200 bg-slate-50/60 p-2 dark:border-slate-800 dark:bg-slate-950/60">
         <svg
           viewBox={`0 0 ${width} ${height}`}
           className="h-48 w-full select-none"
@@ -126,12 +124,11 @@ export function SpreadHistoryChart({ points }: SpreadHistoryChartProps) {
         >
           <defs>
             <linearGradient id="brechaGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#fbbf24" stopOpacity="0.32" />
-              <stop offset="100%" stopColor="#fbbf24" stopOpacity="0.02" />
+              <stop offset="0%" stopColor="#0067b8" stopOpacity="0.25" />
+              <stop offset="100%" stopColor="#0067b8" stopOpacity="0.02" />
             </linearGradient>
           </defs>
 
-          {/* Horizontal Grid */}
           {[0, 0.5, 1].map((t, i) => {
             const y = padY + t * innerH;
             const val = maxVal - t * (maxVal - minVal);
@@ -142,7 +139,8 @@ export function SpreadHistoryChart({ points }: SpreadHistoryChartProps) {
                   y1={y}
                   x2={width - padX}
                   y2={y}
-                  stroke="#1e293b"
+                  stroke="currentColor"
+                  className="text-slate-200 dark:text-slate-800"
                   strokeDasharray="4 4"
                 />
                 <text
@@ -163,8 +161,8 @@ export function SpreadHistoryChart({ points }: SpreadHistoryChartProps) {
             <path
               d={pathD}
               fill="none"
-              stroke="#fbbf24"
-              strokeWidth="2.5"
+              stroke="#0067b8"
+              strokeWidth="2.25"
               strokeLinejoin="round"
               strokeLinecap="round"
             />
@@ -175,9 +173,9 @@ export function SpreadHistoryChart({ points }: SpreadHistoryChartProps) {
               <circle
                 cx={c.x}
                 cy={c.y}
-                r={hoverIdx === idx ? 5.5 : 3}
-                fill={hoverIdx === idx ? '#34d399' : '#fbbf24'}
-                stroke="#0f172a"
+                r={hoverIdx === idx ? 5 : 2.75}
+                fill={hoverIdx === idx ? '#059669' : '#0067b8'}
+                stroke="#ffffff"
                 strokeWidth="1.5"
               />
               <rect

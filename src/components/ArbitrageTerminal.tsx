@@ -9,6 +9,9 @@ import { BANK_BY_ID, VENEZUELAN_BANKS } from '../data/banks';
 import {
   calculateForwardArbitrage,
   calculateReverseArbitrage,
+  calculateVwapFromOffers,
+  compareBridgeRoutes,
+  P2pOffer,
   rankAllBanks,
 } from '../engine/arbitrage';
 import { MarketSnapshot } from '../services/ratesApi';
@@ -44,6 +47,8 @@ export function ArbitrageTerminal({
 
   const [p2pFeePct, setP2pFeePct] = useState<number>(0);
   const [customCardFeePct, setCustomCardFeePct] = useState<string>('');
+  const [settlementDays, setSettlementDays] = useState<number>(0);
+  const [dailyBcvDriftPct, setDailyBcvDriftPct] = useState<string>('0.25');
   const [justLogged, setJustLogged] = useState(false);
 
   const selectedBank = BANK_BY_ID[selectedBankId] ?? VENEZUELAN_BANKS[0];
@@ -66,6 +71,8 @@ export function ArbitrageTerminal({
     return Number.isFinite(val) && val >= 0 ? val / 100 : undefined;
   }, [customCardFeePct]);
 
+  const parsedDrift = Math.max(0, parseFloat(dailyBcvDriftPct) || 0);
+
   const reverseResult = useMemo(() => {
     if (mode !== 'reverse') return null;
     const bsDisp = Math.max(0, parseFloat(bsInput) || 0);
@@ -76,8 +83,10 @@ export function ArbitrageTerminal({
       bank: selectedBank,
       customCardFeePct: parsedCustomCardFee,
       p2pFeePct,
+      settlementDays,
+      dailyBcvDriftPct: parsedDrift,
     });
-  }, [mode, bsInput, tasaBanco, tasaP2P, selectedBank, parsedCustomCardFee, p2pFeePct]);
+  }, [mode, bsInput, tasaBanco, tasaP2P, selectedBank, parsedCustomCardFee, p2pFeePct, settlementDays, parsedDrift]);
 
   const activeResult = useMemo(() => {
     if (mode === 'reverse' && reverseResult) {
@@ -91,8 +100,40 @@ export function ArbitrageTerminal({
       bank: selectedBank,
       customCardFeePct: parsedCustomCardFee,
       p2pFeePct,
+      settlementDays,
+      dailyBcvDriftPct: parsedDrift,
     });
-  }, [mode, reverseResult, usdInput, tasaBanco, tasaP2P, selectedBank, parsedCustomCardFee, p2pFeePct]);
+  }, [mode, reverseResult, usdInput, tasaBanco, tasaP2P, selectedBank, parsedCustomCardFee, p2pFeePct, settlementDays, parsedDrift]);
+
+  const bridgeRoutes = useMemo(
+    () =>
+      compareBridgeRoutes({
+        usdAmount: activeResult.usdAmount || 100,
+        tasaBanco,
+        tasaP2P,
+        bank: selectedBank,
+        customCardFeePct: parsedCustomCardFee,
+        p2pFeePct,
+        settlementDays,
+        dailyBcvDriftPct: parsedDrift,
+      }),
+    [activeResult.usdAmount, tasaBanco, tasaP2P, selectedBank, parsedCustomCardFee, p2pFeePct, settlementDays, parsedDrift],
+  );
+
+  const simulatedBook: P2pOffer[] = useMemo(() => {
+    const base = tasaP2P || snapshot.binanceBuy;
+    return [
+      { merchant: 'Mesa_Top1', price: base, availableUsdt: 450, minBs: 20000, maxBs: 500000, completionRatePct: 99.4, method: 'PagoMóvil' },
+      { merchant: 'Desk_VE2', price: base * 0.997, availableUsdt: 850, minBs: 50000, maxBs: 1200000, completionRatePct: 99.1, method: 'Banesco' },
+      { merchant: 'Liquidez_3', price: base * 0.994, availableUsdt: 1500, minBs: 100000, maxBs: 2500000, completionRatePct: 98.7, method: 'BDV' },
+      { merchant: 'Mayorista_4', price: base * 0.99, availableUsdt: 4000, minBs: 250000, maxBs: 6000000, completionRatePct: 98.2, method: 'Mercantil' },
+    ];
+  }, [tasaP2P, snapshot.binanceBuy]);
+
+  const vwapStats = useMemo(
+    () => calculateVwapFromOffers(simulatedBook, Math.max(1, activeResult.netoUsdt)),
+    [simulatedBook, activeResult.netoUsdt],
+  );
 
   const bankRankings = useMemo(() => {
     const amountForRanking =
@@ -375,6 +416,46 @@ export function ArbitrageTerminal({
                   onChange={(e) => setCustomCardFeePct(e.target.value)}
                   placeholder={`Default (${(selectedBank.pctFija * 100).toFixed(1)}%)`}
                   className="w-full rounded-md border border-slate-300 bg-white px-3 py-1.5 font-mono text-xs text-slate-900 placeholder-slate-400 outline-none focus:border-[#0067b8] dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100 dark:placeholder-slate-600"
+                />
+              </div>
+            </div>
+
+            {/* Temporal Cycle T+N & BCV Drift */}
+            <div className="mt-4 grid grid-cols-1 gap-4 border-t border-slate-100 pt-4 sm:grid-cols-2 dark:border-slate-800/80">
+              <div>
+                <label className="mb-1.5 block text-xs font-medium text-slate-600 dark:text-slate-400">
+                  Ciclo de Liquidación
+                </label>
+                <div className="flex gap-1.5">
+                  {[0, 1, 2].map((days) => (
+                    <button
+                      key={days}
+                      type="button"
+                      onClick={() => setSettlementDays(days)}
+                      className={`flex-1 rounded-md border py-1.5 font-mono text-xs font-semibold transition ${
+                        settlementDays === days
+                          ? 'border-[#0067b8] bg-blue-50 text-[#0067b8] dark:border-sky-500/60 dark:bg-sky-500/15 dark:text-sky-300'
+                          : 'border-slate-200 bg-slate-50 text-slate-600 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-400'
+                      }`}
+                    >
+                      T+{days}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="mb-1.5 block text-xs font-medium text-slate-600 dark:text-slate-400">
+                  Deriva BCV Estimada (%/día)
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  max="5"
+                  step="0.05"
+                  value={dailyBcvDriftPct}
+                  onChange={(e) => setDailyBcvDriftPct(e.target.value)}
+                  className="w-full rounded-md border border-slate-300 bg-white px-3 py-1.5 font-mono text-xs text-slate-900 outline-none focus:border-[#0067b8] dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100"
                 />
               </div>
             </div>
@@ -745,6 +826,87 @@ export function ArbitrageTerminal({
               </table>
             </div>
           </section>
+
+          {/* Bridge Routes & VWAP Depth */}
+          <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+            <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800/90 dark:bg-slate-900/75">
+              <div className="mb-3 flex items-center justify-between">
+                <h2 className="text-xs font-bold tracking-wider text-slate-500 uppercase dark:text-slate-300">
+                  Rutas Puente vs Directa
+                </h2>
+                <span className="font-mono text-[11px] text-slate-500 dark:text-slate-400">
+                  ROI diario: {fmtPct(activeResult.dailyRoiPct, 2, true)}
+                </span>
+              </div>
+              <div className="space-y-2">
+                {bridgeRoutes.map((r, idx) => (
+                  <div
+                    key={r.id}
+                    className={`flex items-center justify-between rounded-lg border px-3 py-2 text-xs ${
+                      idx === 0
+                        ? 'border-[#0067b8]/40 bg-blue-50/50 dark:border-sky-500/40 dark:bg-sky-500/10'
+                        : 'border-slate-200 bg-slate-50/50 dark:border-slate-800 dark:bg-slate-950/50'
+                    }`}
+                  >
+                    <div>
+                      <div className="font-semibold text-slate-900 dark:text-slate-100">
+                        {r.name}
+                      </div>
+                      <div className="text-[11px] text-slate-500 dark:text-slate-400">
+                        Fee {r.bridgeFeePct.toFixed(1)}%
+                      </div>
+                    </div>
+                    <div className="text-right font-mono">
+                      <div className="font-bold text-emerald-700 dark:text-emerald-300">
+                        {fmtBs(r.gananciaBs)} Bs
+                      </div>
+                      <div className="text-[11px] text-slate-500 dark:text-slate-400">
+                        {fmtPct(r.roiPct, 2, true)}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800/90 dark:bg-slate-900/75">
+              <div className="mb-3 flex items-center justify-between">
+                <h2 className="text-xs font-bold tracking-wider text-slate-500 uppercase dark:text-slate-300">
+                  Profundidad P2P &amp; Slippage
+                </h2>
+                <span className="font-mono text-[11px] text-slate-500 dark:text-slate-400">
+                  VWAP ({vwapStats.offersUsed} ofertas)
+                </span>
+              </div>
+              <div className="grid grid-cols-2 gap-2.5 text-xs">
+                <div className="rounded-lg border border-slate-200 bg-slate-50 p-2.5 dark:border-slate-800 dark:bg-slate-950/60">
+                  <span className="text-[11px] text-slate-500 dark:text-slate-400">
+                    Precio Ponderado
+                  </span>
+                  <div className="mt-0.5 font-mono text-sm font-bold text-[#0067b8] dark:text-sky-300">
+                    {fmtBs(vwapStats.vwapPrice)} Bs
+                  </div>
+                </div>
+                <div className="rounded-lg border border-slate-200 bg-slate-50 p-2.5 dark:border-slate-800 dark:bg-slate-950/60">
+                  <span className="text-[11px] text-slate-500 dark:text-slate-400">
+                    Slippage Estimado
+                  </span>
+                  <div className="mt-0.5 font-mono text-sm font-bold text-slate-900 dark:text-slate-100">
+                    {fmtPct(vwapStats.slippagePct, 3)}
+                  </div>
+                </div>
+                <div className="col-span-2 rounded-lg border border-slate-200 bg-slate-50 p-2.5 dark:border-slate-800 dark:bg-slate-950/60">
+                  <div className="flex justify-between text-[11px] text-slate-500 dark:text-slate-400">
+                    <span>Ganancia ajustada (T+{activeResult.settlementDays})</span>
+                    <span className="font-mono font-semibold text-slate-800 dark:text-slate-200">
+                      {fmtBs(activeResult.riskAdjustedProfitBs)} Bs (
+                      {fmtPct(activeResult.riskAdjustedRoiPct, 2, true)})
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </div>
         </div>
       </div>
     </div>

@@ -11,6 +11,7 @@ import { SpreadHistoryChart, SpreadPoint } from './components/SpreadHistoryChart
 import { useLocalStorage } from './hooks/useLocalStorage';
 import {
   fetchLiveMarketSnapshot,
+  fetchWorkerSpreadHistory,
   loadCachedMarketSnapshot,
   MarketSnapshot,
 } from './services/ratesApi';
@@ -182,7 +183,12 @@ export function App() {
 
   useEffect(() => {
     void refreshMarket();
-  }, [refreshMarket]);
+    void fetchWorkerSpreadHistory(30).then((remote) => {
+      if (remote.length > 0) {
+        setSpreadHistory(remote.slice(-120));
+      }
+    });
+  }, [refreshMarket, setSpreadHistory]);
 
   useEffect(() => {
     const timer = window.setInterval(() => {

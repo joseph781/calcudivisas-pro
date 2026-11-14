@@ -1,0 +1,11 @@
+name = "calcudivisas-pro-worker"
+main = "index.ts"
+compatibility_date = "2025-01-01"
+
+[triggers]
+crons = ["*/5 * * * *"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "calcudivisas-pro-db"
+database_id = "130469df-e71f-4f1a-ac28-a8711ffd2c36"

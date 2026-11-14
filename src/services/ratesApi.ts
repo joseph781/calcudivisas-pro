@@ -161,3 +161,24 @@ export async function fetchLiveMarketSnapshot(): Promise<MarketSnapshot> {
 
   return snapshot;
 }
+
+export interface RemoteSpreadPoint {
+  timestamp: string;
+  bcvUsd: number;
+  binanceBuy: number;
+  brechaPct: number;
+}
+
+const WORKER_URL = 'https://calcudivisas-pro-worker.windowstelecom.workers.dev';
+
+export async function fetchWorkerSpreadHistory(days = 30): Promise<RemoteSpreadPoint[]> {
+  try {
+    const res = await fetchJsonWithTimeout<{ ok: boolean; points?: RemoteSpreadPoint[] }>(
+      `${WORKER_URL}/api/history?days=${days}`,
+      5000,
+    );
+    return res.ok && Array.isArray(res.points) ? res.points : [];
+  } catch {
+    return [];
+  }
+}
