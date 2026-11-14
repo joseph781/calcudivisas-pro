@@ -358,16 +358,20 @@ export function LandingPage({
         </div>
       </section>
 
-      {/* Modules */}
+      {/* Modules & Detailed Features */}
       <section id="modulos" className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-        <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
-          <div>
+        <div className="mb-10 flex flex-wrap items-end justify-between gap-4">
+          <div className="max-w-2xl">
             <p className="font-mono text-xs font-semibold tracking-widest text-[#0067b8] uppercase dark:text-sky-400">
-              Arquitectura Modular
+              Capacidades Completas · v3.0
             </p>
-            <h2 className="mt-1 text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
-              Módulos de la Terminal
+            <h2 className="mt-1 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl dark:text-white">
+              Cada función explicada al detalle y su beneficio en tu día a día
             </h2>
+            <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
+              Conoce exactamente qué hace cada herramienta dentro de la plataforma y cómo te ayuda a
+              cuidar tu dinero o el flujo de caja de tu negocio.
+            </p>
           </div>
           <button
             type="button"
@@ -378,54 +382,93 @@ export function LandingPage({
           </button>
         </div>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-4">
           {[
             {
               tab: 'terminal' as const,
               code: '01',
-              title: 'Terminal',
-              desc: 'Calculadora directa e inversa con ranking simultáneo de 14 bancos.',
+              title: 'Calculadora Directa e Inversa',
+              what: 'Calcula cuánto ganas comprando un monto fijo en USD o, al revés, cuántos dólares enteros puedes comprar con tu saldo exacto en bolívares.',
+              benefit:
+                'Beneficio diario: Sabes cuánto dinero te queda libre y tu vuelto en Bs antes de abrir la app del banco.',
+            },
+            {
+              tab: 'terminal' as const,
+              code: '02',
+              title: 'Ranking de 14 Bancos en Vivo',
+              what: 'Evalúa simultáneamente las comisiones de compra (0,3%–0,5%), recarga, uso internacional de tarjeta (1,5%–4,8%) y cargos diferidos en los 14 bancos.',
+              benefit:
+                'Beneficio diario: Eliges en 1 segundo el banco #1 que te deja más ganancia por exactamente la misma operación.',
+            },
+            {
+              tab: 'terminal' as const,
+              code: '03',
+              title: 'Rutas Puente (Zinli, Mony, Wally)',
+              what: 'Compara el rendimiento de usar tu tarjeta nacional directa frente a pasar por billeteras puente como Zinli, Mercantil Panamá o Wally Tech.',
+              benefit:
+                'Beneficio diario: Descubres rutas más baratas cuando la tarjeta de tu banco cobra comisiones altas.',
+            },
+            {
+              tab: 'terminal' as const,
+              code: '04',
+              title: 'Ciclo T+N y Riesgo Temporal',
+              what: 'Mide el ROI Diario y descuenta la deriva estimada del BCV si tu banco tarda 1 o 2 días (T+1 / T+2) en liberar los fondos.',
+              benefit:
+                'Beneficio diario: Evitas que la subida del dólar oficial se coma tu margen mientras esperas liquidación.',
+            },
+            {
+              tab: 'terminal' as const,
+              code: '05',
+              title: 'Profundidad P2P (VWAP y Slippage)',
+              what: 'Calcula el precio promedio ponderado por volumen (VWAP) y el deslizamiento estimado según el tamaño de tu orden en USDT.',
+              benefit:
+                'Beneficio diario: Si operas montos altos para tu comercio, conoces el precio real de salida sin sorpresas.',
             },
             {
               tab: 'simulator' as const,
-              code: '02',
-              title: 'Simulador',
-              desc: 'Gráfico histórico de brecha y matriz de sensibilidad 5×5.',
+              code: '06',
+              title: 'Histórico 24/7 y Matriz 5×5',
+              what: 'Registra la brecha cada 5 minutos en la nube (Cloudflare D1) y simula variaciones de ±3% en BCV y P2P en una tabla de calor.',
+              benefit:
+                'Beneficio diario: Identificas si la brecha de hoy es una buena oportunidad frente al mes y anticipas caídas.',
             },
             {
               tab: 'ledger' as const,
-              code: '03',
-              title: 'Bitácora',
-              desc: 'Métricas de portafolio, rendimiento por banco y exportación CSV.',
-            },
-            {
-              tab: 'alerts' as const,
-              code: '04',
-              title: 'Alertas',
-              desc: 'Reglas configurables sobre brecha, BCV o tasas P2P.',
+              code: '07',
+              title: 'Bitácora, Métricas y CSV',
+              what: 'Guarda cada operación en un clic, calcula Win Rate, Ticket Promedio, Rendimiento por Banco y exporta todo a CSV.',
+              benefit:
+                'Beneficio diario: Llevas la contabilidad exacta de tu negocio o ahorro personal lista para Excel.',
             },
             {
               tab: 'radar' as const,
-              code: '05',
-              title: 'Radar TG',
-              desc: 'Suscripción directa a @midivisas_pro_bot y monitoreo por banco.',
+              code: '08',
+              title: 'Alertas y Bot @midivisas_pro_bot',
+              what: 'Monitorea umbrales de brecha y tasas objetivo las 24 horas y permite consultar /tasas y /ranking directo desde Telegram.',
+              benefit:
+                'Beneficio diario: No pierdes tiempo pegado a la pantalla; tu teléfono te avisa cuando conviene operar.',
             },
           ].map((m) => (
             <button
-              key={m.tab}
+              key={m.code}
               type="button"
               onClick={() => onEnterTerminal(m.tab)}
-              className="flex flex-col items-start rounded-xl border border-slate-200 bg-white p-5 text-left transition hover:border-[#0067b8] dark:border-slate-800 dark:bg-slate-900 dark:hover:border-sky-500"
+              className="flex flex-col justify-between rounded-xl border border-slate-200 bg-white p-5 text-left transition hover:border-[#0067b8] hover:shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:hover:border-sky-500"
             >
-              <span className="font-mono text-[11px] font-bold text-[#0067b8] dark:text-sky-400">
-                MÓDULO {m.code}
-              </span>
-              <div className="mt-1.5 text-sm font-bold text-slate-900 dark:text-white">
-                {m.title}
+              <div>
+                <span className="font-mono text-[11px] font-bold text-[#0067b8] dark:text-sky-400">
+                  FUNCIÓN {m.code}
+                </span>
+                <div className="mt-1.5 text-sm font-bold text-slate-900 dark:text-white">
+                  {m.title}
+                </div>
+                <p className="mt-2 text-xs leading-relaxed text-slate-600 dark:text-slate-400">
+                  {m.what}
+                </p>
               </div>
-              <p className="mt-1.5 text-xs leading-relaxed text-slate-600 dark:text-slate-400">
-                {m.desc}
-              </p>
+              <div className="mt-4 border-t border-slate-100 pt-3 text-[11.5px] font-medium leading-relaxed text-emerald-700 dark:border-slate-800 dark:text-emerald-400">
+                {m.benefit}
+              </div>
             </button>
           ))}
         </div>
